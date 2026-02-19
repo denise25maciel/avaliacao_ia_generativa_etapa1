@@ -1,2 +1,3 @@
 # avaliacao_ia_generativa_etapa1
 Primeiro Commit
+Segundo Commit
