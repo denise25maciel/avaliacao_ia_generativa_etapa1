@@ -1,15 +1,33 @@
 import streamlit as st
 
 st.title("Plataforma de Gestão de Exercícios")
-
+import pandas as pd
 # cria abas principais
 aba_exercicios, aba_avaliacoes, aba_bases = st.tabs(["Exercícios", "Avaliações", "Bases de Dados"])
+# função de diálogo decorada
+@st.dialog("Editar exercício")
+def edit_dialog(idx):
+    df = st.session_state.exercicios_df
+    edited = {}
+    for col in df.columns:
+        edited[col] = st.text_input(col, value=str(df.at[idx, col]))
+    col1, col2 = st.columns(2)
+    if col1.button("Salvar"):
+        for col, val in edited.items():
+            st.session_state.exercicios_df.at[idx, col] = val
+        st.rerun()
+    if col2.button("Cancelar"):
+        st.rerun()
+
+    st.write("Dados atuais:")
+    st.dataframe(st.session_state.exercicios_df)
 
 with aba_exercicios:
     st.header("Exercícios")
-    st.write("Aqui serão exibidos os exercícios cadastrados.")
     # tabela de exercícios persistente em sessão
-    import pandas as pd
+    
+
+
 
     if "exercicios_df" not in st.session_state:
         # cria 30 exercícios de exemplo automaticamente
@@ -29,39 +47,34 @@ with aba_exercicios:
 
     df = st.session_state.exercicios_df
 
-    st.subheader("Lista de exercícios")
-    # escolha de um exercício
-    options = [f"{i} - {row['Código']}" for i, row in df.iterrows()]
-    selected = None
-    if options:
-        choice = st.selectbox("Selecione um exercício", options, key="sel_ex")
-        selected = int(choice.split(" - ")[0])
-        if st.button("Editar este exercício"):
-            st.session_state.edit_index = selected
-            st.session_state.show_modal = True
-
     if st.button("Adicionar novo exercício"):
         new = {k: "" for k in df.columns}
         st.session_state.exercicios_df = pd.concat([df, pd.DataFrame([new])], ignore_index=True)
-        st.session_state.edit_index = len(st.session_state.exercicios_df) - 1
-        st.session_state.show_modal = True
+        edit_dialog(len(st.session_state.exercicios_df) - 1)
 
-    # modal para edição
-    if st.session_state.get("show_modal"):
-        idx = st.session_state.get("edit_index")
-        with st.modal("Editar exercício", key="modal"):
-            edited = {}
-            for col in df.columns:
-                edited[col] = st.text_input(col, value=str(df.at[idx, col]))
-            if st.button("Salvar"):
-                for col, val in edited.items():
-                    st.session_state.exercicios_df.at[idx, col] = val
-                st.session_state.show_modal = False
-            if st.button("Cancelar"):
-                st.session_state.show_modal = False
+    st.subheader("Lista de exercícios")
+    # cabeçalho customizado
+    header_cols = st.columns([1,3,2,1,1,1])
+    header_cols[0].write("Código")
+    header_cols[1].write("Descrição")
+    header_cols[2].write("Fonte")
+    header_cols[3].write("Ano")
+    header_cols[4].write("Dificuldade")
+    header_cols[5].write("")
 
-    st.write("Dados atuais:")
-    st.dataframe(st.session_state.exercicios_df)
+    # exibe cada linha com botão de edição ao lado
+    for idx, row in df.iterrows():
+        row_cols = st.columns([1,3,2,1,1,1])
+        row_cols[0].write(row["Código"])
+        row_cols[1].write(row["Descrição"])
+        row_cols[2].write(row["Fonte"])
+        row_cols[3].write(row["Ano"])
+        row_cols[4].write(row["Dificuldade"])
+        if row_cols[5].button("✏️", key=f"edit_{idx}"):
+            edit_dialog(idx)
+
+
+
 
 with aba_avaliacoes:
     st.header("Avaliações")
