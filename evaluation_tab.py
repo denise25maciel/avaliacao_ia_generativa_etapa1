@@ -122,13 +122,19 @@ def render_aba_avaliacoes():
                 st.session_state.wizard_selected = []
                 st.session_state.wizard_order = []
                 st.rerun()
-            if col2.button("Próximo") and selecionados:
-                st.session_state.wizard_order = selecionados.copy()
-                st.session_state.wizard_step = 2
-                st.rerun()
+            # if col2.button("Próximo") and selecionados:
+            #     st.session_state.wizard_order = selecionados.copy()
+            #     st.session_state.wizard_step = 2
+            #     st.rerun()
 
         elif step == 2:
-            st.header("Passo 2 – Ordenação")
+            st.header("Passo 2 – Ordenação")
+            
+            # Se wizard_order estiver vazio, copia dos selecionados
+            if len(st.session_state.wizard_order) == 0 and len(st.session_state.wizard_selected) > 0:
+                st.session_state.wizard_order = st.session_state.wizard_selected.copy()
+                st.rerun()
+            
             order = [codigo for codigo in st.session_state.wizard_order if codigo in descricao_por_codigo]
             st.session_state.wizard_order = order
 
@@ -186,8 +192,7 @@ def render_aba_avaliacoes():
                 st.session_state.wizard_order = []
                 st.session_state.modo_avaliacoes = "lista"
                 st.rerun()
-            if col4.button("Imprimir"):
-                st.info("Use Ctrl+P no navegador para imprimir a prova final exibida.")
+
         return
 
     st.divider()
