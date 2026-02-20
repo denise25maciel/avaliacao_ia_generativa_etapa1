@@ -228,11 +228,50 @@ def render_aba_bases_dados():
                 # Armazena as questões importadas com o nome da base
                 st.session_state.questoes_bases[nome_base] = questoes_importadas
                 
+                # Adiciona os exercícios à lista de exercícios
+                if "exercicios_df" in st.session_state:
+                    novos_exercicios = []
+                    
+                    for idx, row in df_importado.iterrows():
+                        # Gera código único para o exercício
+                        codigos_validos = []
+                        for codigo in st.session_state.exercicios_df["Código"].astype(str).tolist():
+                            if codigo.startswith("EX") and codigo[2:].isdigit():
+                                codigos_validos.append(int(codigo[2:]))
+                        proximo_numero = (max(codigos_validos) + 1) if codigos_validos else 1
+                        codigo_exercicio = f"EX{proximo_numero:03d}"
+                        
+                        # Extrai informações do exercício
+                        descricao = row.get("Descrição", row.get("questao", ""))
+                        fonte = row.get("Fonte", "ENADE")
+                        ano = row.get("Ano", 2024)
+                        dificuldade = row.get("Dificuldade", "Médio")
+                        
+                        novo_exercicio = {
+                            "Código": codigo_exercicio,
+                            "Descrição": descricao,
+                            "Fonte": fonte,
+                            "Ano": int(ano),
+                            "Dificuldade": dificuldade,
+                            "Origem": nome_base,
+                        }
+                        novos_exercicios.append(novo_exercicio)
+                        
+                        # Atualiza para o próximo código
+                        codigos_validos.append(proximo_numero)
+                    
+                    # Adiciona todos os novos exercícios ao DataFrame
+                    if novos_exercicios:
+                        st.session_state.exercicios_df = pd.concat(
+                            [st.session_state.exercicios_df, pd.DataFrame(novos_exercicios)],
+                            ignore_index=True
+                        )
+                
                 # Marca o arquivo como processado
                 st.session_state.arquivos_importados.add(arquivo_id)
                 st.session_state.processando_upload = False
 
-                st.success(f"✅ Base '{nome_base}' importada com sucesso!")
+                st.success(f"✅ Base '{nome_base}' importada com sucesso! {len(questoes_importadas)} exercício(s) adicionado(s).")
                 st.rerun()
 
             except Exception as e:

@@ -20,10 +20,16 @@ def render_aba_exercicios():
             "Fonte": ["ENADE", "ENADE", "ENADE", "ENADE", "Concurso"],
             "Ano": [2021, 2021, 2021, 2023, 2024],
             "Dificuldade": ["Médio", "Médio", "Médio", "Médio", "Fácil"],
+            "Origem": ["ENADE Computação 2021", "ENADE Computação 2021", "ENADE Computação 2021", "ENADE Computação 2023", "Concursos TI 2024"],
         })
 
     df = st.session_state.exercicios_df
     
+    # Garantir que a coluna "Origem" existe (compatibilidade com dados antigos)
+    if "Origem" not in df.columns:
+        df["Origem"] = "Dados Legados"
+        st.session_state.exercicios_df = df
+
     if st.button("Adicionar novo exercício"):
         novo = {
             "Código": "",
@@ -31,6 +37,7 @@ def render_aba_exercicios():
             "Fonte": "ENADE",
             "Ano": 2024,
             "Dificuldade": "Fácil",
+            "Origem": "Manual",
         }
         st.session_state.exercicios_df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
         st.session_state.editando_idx = len(st.session_state.exercicios_df) - 1
@@ -47,34 +54,36 @@ def render_aba_exercicios():
 
     # Cabeçalho com colunas extras para visualizar/editar/mágica/deletar
     # pesos menores nas ações para maximizar espaço dos dados
-    header = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4, 0.4])
+    header = st.columns([1, 3, 2, 1, 1, 2, 0.7, 0.7, 0.7, 0.7])
     header[0].write("Código")
     header[1].write("Descrição")
     header[2].write("Fonte")
     header[3].write("Ano")
     header[4].write("Dificuldade")
-    header[5].write("Ver")
-    header[6].write("Editar")
-    header[7].write("Mágica")
-    header[8].write("Excluir")
+    header[5].write("Origem")
+    header[6].write(" ")
+    header[7].write(" ")
+    header[8].write(" ")
+    header[9].write(" ")
 
     for idx, row in df.iterrows():
-        linha = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4, 0.4])
+        linha = st.columns([1, 3, 2, 1, 1, 2, 0.7, 0.7, 0.7, 0.7])
         linha[0].write(row["Código"])
         linha[1].write(row["Descrição"])
         linha[2].write(row["Fonte"])
         linha[3].write(row["Ano"])
         linha[4].write(row["Dificuldade"])
+        linha[5].write(row.get("Origem", "N/A"))
 
         # visualizar redireciona para edição em modo somente leitura
-        if linha[5].button("👁️", key=f"ver_{idx}"):
+        if linha[6].button("👁️", key=f"ver_{idx}"):
             st.session_state.editando_idx = idx
             st.session_state.modo = "editar"
             st.session_state.view_only = True
             st.session_state.modo_magica = False
             st.rerun()
 
-        if linha[6].button("✏️", key=f"editar_{idx}"):
+        if linha[7].button("✏️", key=f"editar_{idx}"):
             st.session_state.editando_idx = idx
             st.session_state.modo = "editar"
             st.session_state.view_only = False
@@ -82,14 +91,14 @@ def render_aba_exercicios():
             # atualização do estado e rerun para mudar a tela
             st.rerun()
 
-        if linha[7].button("🪄", key=f"magica_{idx}"):
+        if linha[8].button("🪄", key=f"magica_{idx}"):
             st.session_state.editando_idx = idx
             st.session_state.modo = "editar"
             st.session_state.view_only = False
             st.session_state.modo_magica = True
             st.rerun()
 
-        if linha[8].button("🗑️", key=f"deletar_{idx}"):
+        if linha[9].button("🗑️", key=f"deletar_{idx}"):
             st.session_state.exercicios_df = df.drop(idx).reset_index(drop=True)
             st.rerun()
 

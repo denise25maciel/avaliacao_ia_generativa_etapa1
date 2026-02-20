@@ -61,6 +61,12 @@ def inicializar_dados():
             "Fácil" if i % 3 == 0 else ("Médio" if i % 3 == 1 else "Difícil")
             for i in range(1, 31)
         ],
+        "Origem": [
+            "ENADE Computação 2021" if i % 3 == 1 else (
+                "ENADE Computação 2023" if i % 3 == 2 else "Concursos TI 2024"
+            )
+            for i in range(1, 31)
+        ],
     }
     
     return pd.DataFrame(dados)
@@ -157,12 +163,15 @@ def render_painel_ia(idx, descricao, fonte, ano, dificuldade, view_only):
             st.warning("Processe a adaptação antes de salvar.")
         else:
             novo_codigo = gerar_proximo_codigo_exercicio(st.session_state.exercicios_df)
+            # Pega a origem do exercício original
+            origem_original = df.at[idx, "Origem"] if "Origem" in df.columns else "Adaptação IA"
             novo_exercicio = {
                 "Código": novo_codigo,
                 "Descrição": resultado_adaptado,
                 "Fonte": fonte,
                 "Ano": int(ano),
                 "Dificuldade": dificuldade,
+                "Origem": f"{origem_original} (Adaptado IA)",
             }
             st.session_state.exercicios_df = pd.concat(
                 [st.session_state.exercicios_df, pd.DataFrame([novo_exercicio])],
@@ -202,6 +211,11 @@ if "avaliacoes_editando_idx" not in st.session_state:
 
 
 df = st.session_state.exercicios_df
+
+# Garantir que a coluna "Origem" existe (compatibilidade com dados antigos)
+if "Origem" not in df.columns:
+    df["Origem"] = "Dados Legados"
+    st.session_state.exercicios_df = df
 
 
 # ===================================================
@@ -301,6 +315,12 @@ if st.session_state.modo == "editar":
                 disabled=view_only,
             )
 
+        origem = st.text_input(
+            "Origem",
+            value=df.at[idx, "Origem"] if "Origem" in df.columns else "Manual",
+            disabled=view_only,
+        )
+
         st.divider()
         
         if view_only:
@@ -330,6 +350,7 @@ if st.session_state.modo == "editar":
                 st.session_state.exercicios_df.at[idx, "Fonte"] = fonte
                 st.session_state.exercicios_df.at[idx, "Ano"] = ano
                 st.session_state.exercicios_df.at[idx, "Dificuldade"] = dificuldade
+                st.session_state.exercicios_df.at[idx, "Origem"] = origem
 
                 st.session_state.modo = "lista"
                 st.session_state.editando_idx = None
