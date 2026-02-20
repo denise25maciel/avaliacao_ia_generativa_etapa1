@@ -1,0 +1,125 @@
+Develop a high-fidelity interface proposal, limited to Streamlit components, for the problem and solution described below:
+
+Identified Problem – Professor Ana currently experiences the following difficulties:
+
+She needs to manually search for competitive exam exercises to use them in tests.
+
+She needs to adapt exercises into simpler ones or link them to SDG (Sustainable Development Goals) themes.
+
+She needs to determine the difficulty level, that is, whether each exercise is simple, intermediate, or advanced.
+
+Based on the selected questions, she needs to organize them by topic and progressively display the questions according to difficulty.
+
+Because the process is carried out manually, Ana’s main pain points are the high amount of time required to manually develop the questions and the lack of version control for the original questions.
+
+Proposed Solution: Development of a web-based platform. The platform allows:
+
+Uploading a database of exercises
+
+Registering exercises from the uploaded data
+
+Structured search with multiple filters
+
+Adapting an exercise so that multiple simpler exercises can be generated from it, with version history
+
+Adapting an exercise so that it addresses an SDG theme
+
+
+I've designed the Exercise Management Dashboard for Professor Ana.
+
+This interface follows a Streamlit-inspired layout to provide a familiar and efficient workspace:
+
+Sidebar Controls: Easy access to file uploads for exercise databases and granular filters for Subject, Difficulty, and SDG themes.
+Actionable Insights: Top-level metrics show the current state of her database at a glance.
+Search & Manage: A centralized data table allows her to search, sort, and identify which questions need adaptation or SDG alignment.
+How does this initial dashboard look? We can proceed to design the Exercise Adaptation flow or the Version History view next.
+
+
+Translate to portuguese. Aditionally. When Ana selects an ex ercise it's open another interface she writes a comand that premisses adapt the execise to context of an SGDs(Onu) or make easy exercises or more from de pre selected exercise
+
+
+Atualizei as telas para você:
+
+Painel de Gestão de Exercícios: Agora está totalmente traduzido para o português. Adicionei também a coluna de ações para facilitar o acesso à edição.
+Interface de Adaptação: Uma nova tela onde a Professora Ana pode ver o exercício original e digitar comandos para a IA. Ela pode pedir para adaptar o contexto para uma ODS específica (como a ODS 13 de Ação Climática), simplificar o enunciado ou gerar novas variações.
+O que achou dessas atualizações? Deseja ajustar algo no fluxo de adaptação ou no histórico de versões?
+
+
+Muito bom, no entanto, em COMANDO PARA IA eu gostaria de um componente para que possam ser selecionados os temas de ODS de interesse e outro para indicar se deseja criar novas questões, além de componente para indicar o número de questões
+
+
+Atualizei a interface de adaptação com os componentes que você solicitou!
+
+Agora, na seção IA E ADAPTAÇÃO, incluí:
+
+Um seletor de múltipla escolha para os Temas de ODS.
+Um interruptor (toggle) para ativar a opção de Criar novas questões.
+Um seletor numérico para definir o Número de questões desejadas.
+Tudo foi mantido no padrão visual do Streamlit para garantir a consistência da ferramenta. O que achou dessa nova organização?
+
+
+Altere o idioma para o português, altere as questões para que as mesmas sejam relacionadas à programação python
+
+
+Atualizei as telas conforme solicitado!
+
+Painel de Gestão: Todos os exercícios agora estão relacionados à Programação Python, com temas como manipulação de listas, dicionários e funções. A interface permanece totalmente em português.
+Adaptação de Exercício: O exercício de exemplo agora foca em Lógica de Programação (Sequência de Fibonacci), e o campo de comando está pronto para receber instruções específicas para Python ou ODS.
+Gostaria de refinar algum desses exercícios ou adicionar uma nova funcionalidade ao fluxo?
+
+
+Agora desejo inserir uma nova funcionalidade no painel inicial. Quero a opção de "Criar Avaliação". É uma nova interface em que o professor seleciona questões e ao gerar o sistema organiza as questões por tema e complexidade.
+
+
+Pronto! Atualizei o projeto com a nova funcionalidade de criação de avaliações:
+
+Painel de Gestão Atualizado: Adicionei o botão "Criar Avaliação" na barra lateral do painel principal, permitindo que a Professora Ana inicie o processo facilmente.
+Interface de Criação de Avaliação: Desenvolvi uma nova tela dedicada onde é possível:
+Pesquisar e selecionar exercícios específicos de Python.
+Visualizar um resumo das questões escolhidas.
+Configurar o título da prova e confirmar a organização automática por tema e complexidade antes de gerar o documento final.
+Tudo foi construído mantendo o padrão visual escuro do Streamlit para total consistência. O que achou dessa nova etapa do fluxo?
+
+
+Reveja essa opção com as normas de usabilidade de nielsen norman
+
+
+Apliquei as heurísticas de Nielsen na tela de "Criar Avaliação" para tornar a experiência da Professora Ana mais fluida e segura.
+
+Principais Melhorias:
+
+Status do Sistema: Adicionei um indicador claro de "Modo de Seleção Ativo" e badges de quantidade.
+Controle e Liberdade: Agora existem opções para "Selecionar Todos" e "Limpar Seleção", além da possibilidade de remover itens individualmente direto no resumo lateral.
+Prevenção de Erros: O botão "Gerar Avaliação" agora é desativado visualmente caso não haja questões selecionadas, evitando envios acidentais.
+Reconhecimento: O resumo lateral agora exibe os IDs das questões, facilitando a conferência sem que ela precise decorar o que escolheu.
+O que achou desses ajustes de usabilidade?
+
+
+Gostaria de alterar a interface inicial para Ter a relação de provas geradas, a relação de bases de dados e relação de exercícios gerados
+
+
+Aqui está o novo painel centralizado para a Professora Ana.
+
+O que mudou:
+
+Visão 360°: O painel agora organiza as três frentes de trabalho: Bases de Dados, Exercícios e Provas Geradas.
+Navegação por Abas: Usei o padrão de abas do Streamlit para manter a interface limpa e organizada, permitindo alternar rapidamente entre as listas.
+Métricas Atualizadas: Os cartões superiores agora refletem diretamente o progresso em cada uma dessas categorias.
+Histórico e Ações: Cada lista possui suas próprias ações rápidas, como ver detalhes ou editar, facilitando a gestão.
+Como essa nova organização se encaixa no fluxo de trabalho dela? Deseja detalhar melhor alguma das listas?
+
+
+Em vez de três listas, na aba base de dados, deixe só a base de dados. O filtro que hoje está no menu lateral deve ser visível abaixo de "Pesquisa por palavra-chave"
+
+
+Ajustei o painel principal conforme solicitado.
+
+Agora, na aba Bases de Dados, apenas a tabela correspondente é exibida, limpando o visual. Os filtros de Matéria, Dificuldade e Tema ODS foram movidos da barra lateral para a área central, logo abaixo da barra de pesquisa, facilitando a filtragem direta dos dados.
+
+Como ficou essa nova organização? Deseja ajustar algo mais nas outras abas ou filtros?
+
+
+Em vez de três listas, na aba base de dados, deixe só a base de dados. O filtro que hoje está no menu lateral deve ser visível abaixo de "Pesquisa por palavra-chave"
+
+
+Ajustei o painel conforme solicitado. Agora, na aba "Bases de Dados", você verá apenas a relação de bases. Além disso, os filtros de Matéria, Dificuldade e Tema ODS foram movidos da lateral para o corpo central, logo abaixo da barra de pesquisa, para uma navegação mais direta e focada.
