@@ -43,20 +43,27 @@ def render_aba_avaliacoes():
                 selecionados = []
             else:
                 todos_codigos = exercises["Código"].tolist()
-                a1, a2, _ = st.columns([1, 1, 4])
-                if a1.button("Selecionar todos", key="wizard_select_all"):
-                    st.session_state.wizard_selected = todos_codigos.copy()
+                todos_marcados = (
+                    len(st.session_state.wizard_selected) == len(todos_codigos)
+                    and len(todos_codigos) > 0
+                )
+                marcar_todos = st.checkbox(
+                    "Selecionar todos",
+                    value=todos_marcados,
+                    key="wizard_toggle_all",
+                )
+
+                estado_anterior = st.session_state.get("wizard_toggle_all_prev", todos_marcados)
+                if marcar_todos != estado_anterior:
+                    st.session_state.wizard_selected = todos_codigos.copy() if marcar_todos else []
                     for codigo in todos_codigos:
-                        st.session_state[f"wizard_sel_{codigo}"] = True
+                        st.session_state[f"wizard_sel_{codigo}"] = marcar_todos
+                    st.session_state.wizard_toggle_all_prev = marcar_todos
                     st.rerun()
-                if a2.button("Limpar seleção", key="wizard_clear_all"):
-                    st.session_state.wizard_selected = []
-                    for codigo in todos_codigos:
-                        st.session_state[f"wizard_sel_{codigo}"] = False
-                    st.rerun()
+                st.session_state.wizard_toggle_all_prev = marcar_todos
 
                 cab = st.columns([0.6, 1.2, 3.5, 1.5, 0.8, 1.2])
-                cab[0].write("Selecionar")
+                cab[0].write(" ")
                 cab[1].write("Código")
                 cab[2].write("Descrição")
                 cab[3].write("Fonte")
