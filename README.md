@@ -49,11 +49,21 @@ O desenvolvimento da interface foi conduzido em **três etapas distintas**, util
 | Etapa | Ferramenta Utilizada | Objetivo | Procedimento | Resultado Observado | Nº da Imagem | Inferências de UX |
 |-------|----------------------|----------|--------------|--------------------|--------------|------------------|
 | **Etapa 1** | ChatGPT | 🧩 Estruturar a problemática | Reformulação e organização da descrição do problema | Texto claro e organizado | — | Boa organização conceitual |
-| **Etapa 2** | ChatGPT + Google LLM Stitch | 🎨 Gerar interface gráfica | ChatGPT → estrutura única e pouco organizada. <br> Stitch → hierarquia visual superior | Stitch apresentou melhor organização sequencial | Imagem 1 (ChatGPT) <br> Imagem 2 (Stitch) | Interfaces sequenciais favorecem clareza |
-| **Etapa 3** | OpenAI Codex | 🛠️ Implementação prática | Primeira tentativa com descrição extensa → resultado intermediário. <br> Segunda tentativa com instruções curtas e progressivas | Estrutura modular superior e melhor controle de layout | Imagem 3 | Iteração incremental melhora UX |
+| **Etapa 2** | ChatGPT + Google LLM Stitch | 🎨 Gerar interface gráfica | ChatGPT → estrutura única e pouco organizada. <br> Stitch → hierarquia visual superior | Stitch apresentou melhor organização sequencial o Chat GPT apresentou resultados significativamente inconsistentes|  (ChatGPT) <br> Imagem 1 (Chat GPT) - Imagem 2 (Stitch) | Interfaces sequenciais favorecem clareza |
+| **Etapa 3** | OpenAI Codex | 🛠️ Implementação prática | Primeira tentativa com descrição extensa → resultado intermediário. <br> Segunda tentativa com instruções curtas e progressivas | Estrutura modular superior e melhor controle de layout | - | Iteração incremental melhora UX |
 
 ---
 
+Imagem 1 - Interface gerada pelo Chat GPT
+<img width="886" height="591" alt="image" src="https://github.com/user-attachments/assets/329285e7-dd22-42d9-9c74-c51dcd49b21b" />
+
+Imagem 2 - Interface gerada pelo Stitch do google
+<img width="328" height="265" alt="image" src="https://github.com/user-attachments/assets/d12098e7-9d62-470e-a6b2-0de7bf2527f4" />
+
+
+
+Imagem 3 - 
+<img width="900" height="381" alt="image" src="https://github.com/user-attachments/assets/498fd4a3-5a8c-4553-a2a3-454130e4024b" />
 ## ⚙️ Observações Técnicas do Processo com Codex
 
 Durante a implementação com o OpenAI Codex, verificou-se que a qualidade do resultado está diretamente relacionada ao nível de detalhamento das instruções.
