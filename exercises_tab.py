@@ -23,9 +23,7 @@ def render_aba_exercicios():
         })
 
     df = st.session_state.exercicios_df
-
-    st.subheader("Lista de exercícios")
-
+    
     if st.button("Adicionar novo exercício"):
         novo = {
             "Código": "",
@@ -37,6 +35,7 @@ def render_aba_exercicios():
         st.session_state.exercicios_df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
         st.session_state.editando_idx = len(st.session_state.exercicios_df) - 1
         st.session_state.modo = "editar"
+        st.session_state.modo_magica = False
         # precisamos recriar a interface imediatamente após a alteração do estado
         # `st.rerun()` (ou `st.experimental_rerun()`) força o Streamlit a reexecutar o
         # script desde o topo. Sem ela a atualização só aparece num clique seguinte
@@ -46,9 +45,9 @@ def render_aba_exercicios():
 
     st.divider()
 
-    # Cabeçalho com colunas extras para visualizar/editar/deletar
+    # Cabeçalho com colunas extras para visualizar/editar/mágica/deletar
     # pesos menores nas ações para maximizar espaço dos dados
-    header = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4])
+    header = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4, 0.4])
     header[0].write("Código")
     header[1].write("Descrição")
     header[2].write("Fonte")
@@ -56,10 +55,11 @@ def render_aba_exercicios():
     header[4].write("Dificuldade")
     header[5].write("Ver")
     header[6].write("Editar")
-    header[7].write("Excluir")
+    header[7].write("Mágica")
+    header[8].write("Excluir")
 
     for idx, row in df.iterrows():
-        linha = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4])
+        linha = st.columns([1, 4, 3, 1, 1, 0.4, 0.4, 0.4, 0.4])
         linha[0].write(row["Código"])
         linha[1].write(row["Descrição"])
         linha[2].write(row["Fonte"])
@@ -71,16 +71,25 @@ def render_aba_exercicios():
             st.session_state.editando_idx = idx
             st.session_state.modo = "editar"
             st.session_state.view_only = True
+            st.session_state.modo_magica = False
             st.rerun()
 
         if linha[6].button("✏️", key=f"editar_{idx}"):
             st.session_state.editando_idx = idx
             st.session_state.modo = "editar"
             st.session_state.view_only = False
+            st.session_state.modo_magica = False
             # atualização do estado e rerun para mudar a tela
             st.rerun()
 
-        if linha[7].button("🗑️", key=f"deletar_{idx}"):
+        if linha[7].button("🪄", key=f"magica_{idx}"):
+            st.session_state.editando_idx = idx
+            st.session_state.modo = "editar"
+            st.session_state.view_only = False
+            st.session_state.modo_magica = True
+            st.rerun()
+
+        if linha[8].button("🗑️", key=f"deletar_{idx}"):
             st.session_state.exercicios_df = df.drop(idx).reset_index(drop=True)
             st.rerun()
 

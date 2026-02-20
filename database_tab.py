@@ -166,8 +166,6 @@ def render_aba_bases_dados():
         st.divider()
         return
 
-    st.subheader("Bases de Dados Cadastradas")
-
     # Componente para importar nova base de dados
     arquivo = st.file_uploader(
         "Importar base de dados",

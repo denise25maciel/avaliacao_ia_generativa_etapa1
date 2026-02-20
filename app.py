@@ -90,6 +90,87 @@ def gerar_proximo_codigo_exercicio(df_exercicios):
     return f"EX{proximo_numero:03d}"
 
 
+def render_painel_ia(idx, descricao, fonte, ano, dificuldade, view_only):
+    ods_opcoes = [
+        "ODS 1 - Erradicação da Pobreza",
+        "ODS 3 - Saúde e Bem-Estar",
+        "ODS 4 - Educação de Qualidade",
+        "ODS 8 - Trabalho Decente e Crescimento Econômico",
+        "ODS 9 - Indústria, Inovação e Infraestrutura",
+        "ODS 10 - Redução das Desigualdades",
+        "ODS 11 - Cidades e Comunidades Sustentáveis",
+        "ODS 12 - Consumo e Produção Responsáveis",
+        "ODS 13 - Ação Contra a Mudança Global do Clima",
+        "ODS 16 - Paz, Justiça e Instituições Eficazes",
+    ]
+
+    tema_key = f"tema_ods_ex_{idx}"
+    comando_key = f"comando_ia_ex_{idx}"
+    comando_tema_key = f"comando_ia_tema_ex_{idx}"
+    resultado_key = f"resultado_adaptacao_ex_{idx}"
+
+    if tema_key not in st.session_state:
+        st.session_state[tema_key] = "ODS 4 - Educação de Qualidade"
+
+    st.subheader("Comandos para a IA")
+    tema_ods = st.selectbox(
+        "Tema ODS",
+        options=ods_opcoes,
+        key=tema_key,
+        disabled=view_only,
+    )
+
+    if (
+        comando_key not in st.session_state
+        or st.session_state.get(comando_tema_key) != tema_ods
+    ):
+        st.session_state[comando_key] = gerar_comando_ia(descricao, tema_ods)
+        st.session_state[comando_tema_key] = tema_ods
+
+    st.text_area(
+        "Insira os comandos para a IA",
+        key=comando_key,
+        height=180,
+        label_visibility="collapsed",
+        disabled=view_only,
+    )
+
+    if st.button("Processar", key="processar_ia", use_container_width=True, disabled=view_only):
+        st.session_state[resultado_key] = adaptar_exercicio_para_ods(
+            descricao_exercicio=descricao,
+            tema_ods=tema_ods,
+        )
+        st.success("Exercício adaptado com sucesso.")
+
+    st.subheader("Resultado da Adaptação")
+    st.text_area(
+        "Exercício adaptado",
+        value=st.session_state.get(resultado_key, ""),
+        height=220,
+        label_visibility="collapsed",
+        disabled=True,
+    )
+
+    if st.button("Salvar adaptação", key="salvar_adaptacao_ia", use_container_width=True, disabled=view_only):
+        resultado_adaptado = st.session_state.get(resultado_key, "").strip()
+        if not resultado_adaptado:
+            st.warning("Processe a adaptação antes de salvar.")
+        else:
+            novo_codigo = gerar_proximo_codigo_exercicio(st.session_state.exercicios_df)
+            novo_exercicio = {
+                "Código": novo_codigo,
+                "Descrição": resultado_adaptado,
+                "Fonte": fonte,
+                "Ano": int(ano),
+                "Dificuldade": dificuldade,
+            }
+            st.session_state.exercicios_df = pd.concat(
+                [st.session_state.exercicios_df, pd.DataFrame([novo_exercicio])],
+                ignore_index=True,
+            )
+            st.success(f"Exercício adaptado salvo como novo registro ({novo_codigo}).")
+
+
 if "exercicios_df" not in st.session_state:
     st.session_state.exercicios_df = inicializar_dados()
 
@@ -98,6 +179,9 @@ if "modo" not in st.session_state:
 
 if "editando_idx" not in st.session_state:
     st.session_state.editando_idx = None
+
+if "modo_magica" not in st.session_state:
+    st.session_state.modo_magica = False
 
 # ---------------------------------------------------
 # estado para a aba "Avaliações"
@@ -128,6 +212,38 @@ if st.session_state.modo == "editar":
 
     idx = st.session_state.editando_idx
     view_only = st.session_state.get("view_only", False)
+    modo_magica = st.session_state.get("modo_magica", False)
+
+    codigo = df.at[idx, "Código"]
+    descricao = df.at[idx, "Descrição"]
+    fonte = df.at[idx, "Fonte"]
+    ano = int(df.at[idx, "Ano"])
+    dificuldade = df.at[idx, "Dificuldade"]
+
+    if modo_magica:
+        st.header("Adaptação do exercício")
+        st.divider()
+        st.subheader("Questão")
+        st.text_area(
+            "Questão original",
+            value=descricao,
+            height=180,
+            disabled=True,
+            label_visibility="collapsed",
+        )
+        st.caption(f"Código: {codigo} | Fonte: {fonte} | Ano: {ano} | Dificuldade: {dificuldade}")
+        st.divider()
+
+        render_painel_ia(idx, descricao, fonte, ano, dificuldade, view_only=False)
+
+        if st.button("Voltar", key="voltar_magica", use_container_width=True):
+            st.session_state.modo = "lista"
+            st.session_state.editando_idx = None
+            st.session_state.view_only = False
+            st.session_state.modo_magica = False
+            st.rerun()
+
+        st.stop()
 
     st.header("Editar exercício")
     st.divider()
@@ -188,12 +304,14 @@ if st.session_state.modo == "editar":
             st.session_state.modo = "lista"
             st.session_state.editando_idx = None
             st.session_state.view_only = False
+            st.session_state.modo_magica = False
             st.rerun()
 
         if b2.button("Cancelar", key="cancelar_edicao", use_container_width=True):
             st.session_state.modo = "lista"
             st.session_state.editando_idx = None
             st.session_state.view_only = False
+            st.session_state.modo_magica = False
             st.rerun()
 
     # -------------------------
@@ -201,84 +319,7 @@ if st.session_state.modo == "editar":
     # -------------------------
 
     with col_direita:
-        ods_opcoes = [
-            "ODS 1 - Erradicação da Pobreza",
-            "ODS 3 - Saúde e Bem-Estar",
-            "ODS 4 - Educação de Qualidade",
-            "ODS 8 - Trabalho Decente e Crescimento Econômico",
-            "ODS 9 - Indústria, Inovação e Infraestrutura",
-            "ODS 10 - Redução das Desigualdades",
-            "ODS 11 - Cidades e Comunidades Sustentáveis",
-            "ODS 12 - Consumo e Produção Responsáveis",
-            "ODS 13 - Ação Contra a Mudança Global do Clima",
-            "ODS 16 - Paz, Justiça e Instituições Eficazes",
-        ]
-
-        tema_key = f"tema_ods_ex_{idx}"
-        comando_key = f"comando_ia_ex_{idx}"
-        comando_tema_key = f"comando_ia_tema_ex_{idx}"
-        resultado_key = f"resultado_adaptacao_ex_{idx}"
-
-        if tema_key not in st.session_state:
-            st.session_state[tema_key] = "ODS 4 - Educação de Qualidade"
-
-        st.subheader("Comandos para a IA")
-        tema_ods = st.selectbox(
-            "Tema ODS",
-            options=ods_opcoes,
-            key=tema_key,
-            disabled=view_only,
-        )
-
-        if (
-            comando_key not in st.session_state
-            or st.session_state.get(comando_tema_key) != tema_ods
-        ):
-            st.session_state[comando_key] = gerar_comando_ia(descricao, tema_ods)
-            st.session_state[comando_tema_key] = tema_ods
-
-        comandos_ia = st.text_area(
-            "Insira os comandos para a IA",
-            key=comando_key,
-            height=180,
-            label_visibility="collapsed",
-            disabled=view_only,
-        )
-
-        if st.button("Processar", key="processar_ia", use_container_width=True, disabled=view_only):
-            st.session_state[resultado_key] = adaptar_exercicio_para_ods(
-                descricao_exercicio=descricao,
-                tema_ods=tema_ods,
-            )
-            st.success("Exercício adaptado com sucesso.")
-
-        st.subheader("Resultado da Adaptação")
-        st.text_area(
-            "Exercício adaptado",
-            value=st.session_state.get(resultado_key, ""),
-            height=220,
-            label_visibility="collapsed",
-            disabled=True,
-        )
-
-        if st.button("Salvar adaptação", key="salvar_adaptacao_ia", use_container_width=True, disabled=view_only):
-            resultado_adaptado = st.session_state.get(resultado_key, "").strip()
-            if not resultado_adaptado:
-                st.warning("Processe a adaptação antes de salvar.")
-            else:
-                novo_codigo = gerar_proximo_codigo_exercicio(st.session_state.exercicios_df)
-                novo_exercicio = {
-                    "Código": novo_codigo,
-                    "Descrição": resultado_adaptado,
-                    "Fonte": fonte,
-                    "Ano": int(ano),
-                    "Dificuldade": dificuldade,
-                }
-                st.session_state.exercicios_df = pd.concat(
-                    [st.session_state.exercicios_df, pd.DataFrame([novo_exercicio])],
-                    ignore_index=True,
-                )
-                st.success(f"Exercício adaptado salvo como novo registro ({novo_codigo}).")
+        render_painel_ia(idx, descricao, fonte, ano, dificuldade, view_only)
         
         
     # Impede renderização do restante da página

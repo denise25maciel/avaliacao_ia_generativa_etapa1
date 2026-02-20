@@ -54,7 +54,6 @@ def render_aba_avaliacoes():
         st.session_state.avaliacoes_df["Questoes"] = [[] for _ in range(len(df))]
         df = st.session_state.avaliacoes_df
 
-    st.subheader("Gerador de avaliações")
 
     # inicializa estado do wizard para criação de avaliação
     if "wizard_step" not in st.session_state:
