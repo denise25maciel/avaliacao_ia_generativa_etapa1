@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from exercises_tab import render_aba_exercicios
 from evaluation_tab import render_aba_avaliacoes
+from database_tab import render_aba_bases_dados
 
 # ---------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
@@ -269,5 +270,4 @@ with aba_avaliacoes:
 
 
 with aba_bases:
-    st.header("Bases de Dados")
-    st.write("Upload e gerenciamento de bases de exercícios.")
+    render_aba_bases_dados()

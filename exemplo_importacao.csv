@@ -1,0 +1,6 @@
+Descrição,Resposta
+Qual é o resultado da expressão lógica (A AND B) OR (NOT A)?,A expressão é verdadeira quando B é verdadeiro ou quando A é falso. Usando álgebra booleana: (A∧B)∨¬A = B∨¬A
+Explique o conceito de normalização em bancos de dados relacionais.,Normalização é o processo de organizar dados para minimizar redundância e dependências. As formas normais (1FN a 5FN) eliminam anomalias de inserção/atualização/exclusão.
+Qual é a diferença entre compilador e interpretador?,Compilador traduz todo código-fonte para linguagem de máquina antes da execução. Interpretador traduz e executa linha por linha em tempo de execução.
+O que é injeção de dependência em programação orientada a objetos?,Técnica onde objetos recebem suas dependências externamente ao invés de criá-las internamente. Promove baixo acoplamento e facilita testes.
+Explique o teorema CAP em sistemas distribuídos.,Em sistemas distribuídos é impossível garantir simultaneamente: Consistência (Consistency) + Disponibilidade (Availability) + Tolerância a Partição (Partition tolerance). Apenas 2 de 3 são possíveis.
