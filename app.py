@@ -101,7 +101,7 @@ if st.session_state.modo == "editar":
 
         b1, b2 = st.columns(2)
 
-        if b1.button("Salvar", use_container_width=True):
+        if b1.button("Salvar", key="salvar_exercicio", use_container_width=True):
             st.session_state.exercicios_df.at[idx, "Código"] = codigo
             st.session_state.exercicios_df.at[idx, "Descrição"] = descricao
             st.session_state.exercicios_df.at[idx, "Fonte"] = fonte
@@ -112,7 +112,7 @@ if st.session_state.modo == "editar":
             st.session_state.editando_idx = None
             st.rerun()
 
-        if b2.button("Cancelar", use_container_width=True):
+        if b2.button("Cancelar", key="cancelar_edicao", use_container_width=True):
             st.session_state.modo = "lista"
             st.session_state.editando_idx = None
             st.rerun()
@@ -122,9 +122,32 @@ if st.session_state.modo == "editar":
     # -------------------------
 
     with col_direita:
-        st.subheader("Preview")
-        st.dataframe(st.session_state.exercicios_df.loc[[idx]], use_container_width=True)
+        
+        st.subheader("Comandos para a IA")
+        comandos_ia = st.text_area(
+            "Insira os comandos para a IA",
+            value="",
+            height=150,
+            label_visibility="collapsed"
+        )
 
+        if st.button("Processar", key="processar_ia", use_container_width=True):
+            # Aqui você pode adicionar a lógica para processar os comandos
+            st.info(f"Comandos recebidos: {comandos_ia}")
+
+        st.subheader("Resultado da Adaptação")
+        comandos_ia = st.text_area(
+            "IExercício adaptado para o ENEM",
+            value="",
+            height=150,
+            label_visibility="collapsed"
+        )
+
+        if st.button("Salvar", use_container_width=True):
+            # Aqui você pode adicionar a lógica para processar os comandos
+            st.info(f"Comando salvo: {comandos_ia}")
+        
+        
     # Impede renderização do restante da página
     st.stop()
 
