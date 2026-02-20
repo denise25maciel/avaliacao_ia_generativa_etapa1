@@ -285,10 +285,11 @@ if st.session_state.modo == "editar":
             )
 
         with col_fonte:
+            fonte_valor = str(df.at[idx, "Fonte"]).upper()
             fonte = st.selectbox(
                 "Fonte",
                 options=["ENADE", "CONCURSO"],
-                index=["ENADE", "CONCURSO"].index(df.at[idx, "Fonte"]),
+                index=["ENADE", "CONCURSO"].index(fonte_valor) if fonte_valor in ["ENADE", "CONCURSO"] else 0,
                 disabled=view_only,
             )
 
