@@ -18,7 +18,7 @@ def render_aba_avaliacoes():
 
     df = st.session_state.avaliacoes_df
 
-    st.subheader("Lista de avaliações")
+    st.subheader("Gerador de avaliações")
 
     # inicializa estado do wizard para criação de avaliação
     if "wizard_step" not in st.session_state:
@@ -32,12 +32,42 @@ def render_aba_avaliacoes():
     if st.session_state.wizard_step != 0:
         step = st.session_state.wizard_step
         exercises = st.session_state.exercicios_df
+        descricao_por_codigo = exercises.set_index("Código")["Descrição"].to_dict() if not exercises.empty else {}
 
         if step == 1:
             st.header("Passo 1 – Seleção de exercícios")
-            options = [f"{r['Código']} - {r['Descrição']}" for _, r in exercises.iterrows()]
-            selecionados = st.multiselect("Escolha os exercícios", options,
-                                         default=st.session_state.wizard_selected)
+            st.write("Selecione os exercícios na primeira coluna.")
+
+            if exercises.empty:
+                st.info("Não há exercícios cadastrados para seleção.")
+                selecionados = []
+            else:
+                cab = st.columns([0.6, 1.2, 3.5, 1.5, 0.8, 1.2])
+                cab[0].write("Selecionar")
+                cab[1].write("Código")
+                cab[2].write("Descrição")
+                cab[3].write("Fonte")
+                cab[4].write("Ano")
+                cab[5].write("Dificuldade")
+
+                selecionados = []
+                for _, row in exercises.iterrows():
+                    codigo = row["Código"]
+                    cols = st.columns([0.6, 1.2, 3.5, 1.5, 0.8, 1.2])
+                    marcado = cols[0].checkbox(
+                        "",
+                        value=codigo in st.session_state.wizard_selected,
+                        key=f"wizard_sel_{codigo}",
+                    )
+                    cols[1].write(codigo)
+                    cols[2].write(row["Descrição"])
+                    cols[3].write(row["Fonte"])
+                    cols[4].write(row["Ano"])
+                    cols[5].write(row["Dificuldade"])
+
+                    if marcado:
+                        selecionados.append(codigo)
+
             st.session_state.wizard_selected = selecionados
 
             col1, col2, col3 = st.columns(3)
@@ -53,10 +83,12 @@ def render_aba_avaliacoes():
 
         elif step == 2:
             st.header("Passo 2 – Ordenação")
-            order = st.session_state.wizard_order
-            for i, item in enumerate(order):
+            order = [codigo for codigo in st.session_state.wizard_order if codigo in descricao_por_codigo]
+            st.session_state.wizard_order = order
+
+            for i, codigo in enumerate(order):
                 cols = st.columns([4, 1, 1])
-                cols[0].write(item)
+                cols[0].write(f"{codigo} - {descricao_por_codigo.get(codigo, '')}")
                 if cols[1].button("↑", key=f"up_{i}") and i > 0:
                     order[i], order[i-1] = order[i-1], order[i]
                     st.session_state.wizard_order = order
@@ -80,9 +112,10 @@ def render_aba_avaliacoes():
 
         elif step == 3:
             st.header("Passo 3 – Prova final")
-            for idx, item in enumerate(st.session_state.wizard_order, start=1):
-                st.write(f"{idx}. {item}")
-            col1, col2, col3 = st.columns(3)
+            for idx, codigo in enumerate(st.session_state.wizard_order, start=1):
+                descricao = descricao_por_codigo.get(codigo, "")
+                st.write(f"{idx}. {codigo} - {descricao}")
+            col1, col2, col3, col4 = st.columns(4)
             if col1.button("Voltar"):
                 st.session_state.wizard_step = 2
                 st.rerun()
@@ -91,7 +124,7 @@ def render_aba_avaliacoes():
                 st.session_state.wizard_selected = []
                 st.session_state.wizard_order = []
                 st.rerun()
-            if col3.button("Salvar e imprimir"):
+            if col3.button("Salvar"):
                 novo = {
                     "Título": f"Avaliação {len(st.session_state.avaliacoes_df)+1}",
                     "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
@@ -107,6 +140,8 @@ def render_aba_avaliacoes():
                 st.session_state.wizard_order = []
                 st.session_state.modo_avaliacoes = "lista"
                 st.rerun()
+            if col4.button("Imprimir"):
+                st.info("Use Ctrl+P no navegador para imprimir a prova final exibida.")
         return
 
     # botão de iniciar wizard
