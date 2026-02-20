@@ -268,6 +268,28 @@ if st.session_state.modo_avaliacoes == "editar":
             st.session_state.view_only = False
             st.rerun()
 
+    with col_direita:
+        st.subheader("Questões")
+        questoes = []
+        if "Questoes" in df2.columns and idx is not None:
+            questoes = df2.at[idx, "Questoes"]
+        if not isinstance(questoes, list):
+            questoes = []
+
+        exercises = st.session_state.get("exercicios_df", pd.DataFrame())
+        descricao_por_codigo = (
+            exercises.set_index("Código")["Descrição"].to_dict()
+            if not exercises.empty
+            else {}
+        )
+
+        if len(questoes) == 0:
+            st.info("Esta avaliação não possui questões associadas.")
+        else:
+            for i, codigo in enumerate(questoes, start=1):
+                descricao = descricao_por_codigo.get(codigo, "")
+                st.write(f"{i}. {codigo} - {descricao}")
+
     # Impede renderização do restante da página
     st.stop()
 

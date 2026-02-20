@@ -14,9 +14,45 @@ def render_aba_avaliacoes():
             "Data": [],
             "Disciplina": [],
             "ODS": [],
+            "Questoes": [],
         })
 
     df = st.session_state.avaliacoes_df
+    if df.empty:
+        st.session_state.avaliacoes_df = pd.DataFrame([
+            {
+                "Título": "Avaliação 1 - Algoritmos",
+                "Data": "2026-02-05",
+                "Disciplina": "Algoritmos",
+                "ODS": "ODS 4",
+                "Questoes": ["EX001", "EX002", "EX003"],
+            },
+            {
+                "Título": "Avaliação 2 - Banco de Dados",
+                "Data": "2026-02-10",
+                "Disciplina": "Banco de Dados",
+                "ODS": "ODS 9",
+                "Questoes": ["EX004", "EX005", "EX006"],
+            },
+            {
+                "Título": "Avaliação 3 - Redes",
+                "Data": "2026-02-12",
+                "Disciplina": "Redes de Computadores",
+                "ODS": "ODS 11",
+                "Questoes": ["EX007", "EX008"],
+            },
+            {
+                "Título": "Avaliação 4 - IA Generativa",
+                "Data": "2026-02-18",
+                "Disciplina": "IA Generativa",
+                "ODS": "ODS 4",
+                "Questoes": ["EX009", "EX010", "EX011"],
+            },
+        ])
+        df = st.session_state.avaliacoes_df
+    if "Questoes" not in df.columns:
+        st.session_state.avaliacoes_df["Questoes"] = [[] for _ in range(len(df))]
+        df = st.session_state.avaliacoes_df
 
     st.subheader("Gerador de avaliações")
 
@@ -161,6 +197,7 @@ def render_aba_avaliacoes():
                     "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
                     "Disciplina": "",
                     "ODS": "",
+                    "Questoes": st.session_state.wizard_order.copy(),
                 }
                 st.session_state.avaliacoes_df = pd.concat([
                     st.session_state.avaliacoes_df,
