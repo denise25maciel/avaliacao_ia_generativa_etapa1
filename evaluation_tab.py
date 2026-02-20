@@ -20,17 +20,100 @@ def render_aba_avaliacoes():
 
     st.subheader("Lista de avaliações")
 
+    # inicializa estado do wizard para criação de avaliação
+    if "wizard_step" not in st.session_state:
+        st.session_state.wizard_step = 0      # 0 = inativo, 1/2/3 passos
+    if "wizard_selected" not in st.session_state:
+        st.session_state.wizard_selected = []
+    if "wizard_order" not in st.session_state:
+        st.session_state.wizard_order = []
+
+    # se wizard ativo, renderiza o passo correspondente e retorna cedo
+    if st.session_state.wizard_step != 0:
+        step = st.session_state.wizard_step
+        exercises = st.session_state.exercicios_df
+
+        if step == 1:
+            st.header("Passo 1 – Seleção de exercícios")
+            options = [f"{r['Código']} - {r['Descrição']}" for _, r in exercises.iterrows()]
+            selecionados = st.multiselect("Escolha os exercícios", options,
+                                         default=st.session_state.wizard_selected)
+            st.session_state.wizard_selected = selecionados
+
+            col1, col2, col3 = st.columns(3)
+            if col1.button("Cancelar"):
+                st.session_state.wizard_step = 0
+                st.session_state.wizard_selected = []
+                st.session_state.wizard_order = []
+                st.rerun()
+            if col2.button("Próximo") and selecionados:
+                st.session_state.wizard_order = selecionados.copy()
+                st.session_state.wizard_step = 2
+                st.rerun()
+
+        elif step == 2:
+            st.header("Passo 2 – Ordenação")
+            order = st.session_state.wizard_order
+            for i, item in enumerate(order):
+                cols = st.columns([4, 1, 1])
+                cols[0].write(item)
+                if cols[1].button("↑", key=f"up_{i}") and i > 0:
+                    order[i], order[i-1] = order[i-1], order[i]
+                    st.session_state.wizard_order = order
+                    st.rerun()
+                if cols[2].button("↓", key=f"down_{i}") and i < len(order)-1:
+                    order[i], order[i+1] = order[i+1], order[i]
+                    st.session_state.wizard_order = order
+                    st.rerun()
+            col1, col2, col3 = st.columns(3)
+            if col1.button("Voltar"):
+                st.session_state.wizard_step = 1
+                st.rerun()
+            if col2.button("Cancelar"):
+                st.session_state.wizard_step = 0
+                st.session_state.wizard_selected = []
+                st.session_state.wizard_order = []
+                st.rerun()
+            if col3.button("Próximo"):
+                st.session_state.wizard_step = 3
+                st.rerun()
+
+        elif step == 3:
+            st.header("Passo 3 – Prova final")
+            for idx, item in enumerate(st.session_state.wizard_order, start=1):
+                st.write(f"{idx}. {item}")
+            col1, col2, col3 = st.columns(3)
+            if col1.button("Voltar"):
+                st.session_state.wizard_step = 2
+                st.rerun()
+            if col2.button("Cancelar"):
+                st.session_state.wizard_step = 0
+                st.session_state.wizard_selected = []
+                st.session_state.wizard_order = []
+                st.rerun()
+            if col3.button("Salvar e imprimir"):
+                novo = {
+                    "Título": f"Avaliação {len(st.session_state.avaliacoes_df)+1}",
+                    "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
+                    "Disciplina": "",
+                    "ODS": "",
+                }
+                st.session_state.avaliacoes_df = pd.concat([
+                    st.session_state.avaliacoes_df,
+                    pd.DataFrame([novo])
+                ], ignore_index=True)
+                st.session_state.wizard_step = 0
+                st.session_state.wizard_selected = []
+                st.session_state.wizard_order = []
+                st.session_state.modo_avaliacoes = "lista"
+                st.rerun()
+        return
+
+    # botão de iniciar wizard
     if st.button("Adicionar nova avaliação"):
-        novo = {
-            "Título": "",
-            "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
-            "Disciplina": "",
-            "ODS": "",
-        }
-        st.session_state.avaliacoes_df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
-        st.session_state.avaliacoes_editando_idx = len(st.session_state.avaliacoes_df) - 1
-        st.session_state.modo_avaliacoes = "editar"
-        # forçamos rerun para que a aba de edição seja exibida imediatamente
+        st.session_state.wizard_step = 1
+        st.session_state.wizard_selected = []
+        st.session_state.wizard_order = []
         st.rerun()
 
     st.divider()
