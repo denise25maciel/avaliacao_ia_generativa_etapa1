@@ -117,18 +117,6 @@ def render_aba_avaliacoes():
             st.session_state.wizard_selected = selecionados
 
             st.divider()
-            col_buttons = st.columns([1, 4, 1])
-            with col_buttons[0]:
-                if st.button("Voltar", use_container_width=True, key="step1_back"):
-                    st.session_state.wizard_step = 0
-                    st.session_state.wizard_selected = []
-                    st.session_state.wizard_order = []
-                    st.rerun()
-            with col_buttons[2]:
-                if st.button("Próximo", use_container_width=True, key="step1_next"):
-                    st.session_state.wizard_order = selecionados.copy()
-                    st.session_state.wizard_step = 2
-                    st.rerun()
 
         elif step == 2:
             st.header("Passo 2 – Ordenação")
@@ -141,12 +129,6 @@ def render_aba_avaliacoes():
             # Verifica se nenhum item foi selecionado
             if len(st.session_state.wizard_order) == 0:
                 st.warning("⚠️ Você deve selecionar ao menos um exercício na Etapa 1 para continuar.")
-                st.divider()
-                col_buttons = st.columns([1, 4, 1])
-                with col_buttons[0]:
-                    if st.button("Voltar", use_container_width=True, key="step2_back_no_items"):
-                        st.session_state.wizard_step = 1
-                        st.rerun()
                 return
             
             order = [codigo for codigo in st.session_state.wizard_order if codigo in descricao_por_codigo]
@@ -165,15 +147,6 @@ def render_aba_avaliacoes():
                     st.rerun()
             
             st.divider()
-            col_buttons = st.columns([1, 4, 1])
-            with col_buttons[0]:
-                if st.button("Voltar", use_container_width=True, key="step2_back"):
-                    st.session_state.wizard_step = 1
-                    st.rerun()
-            with col_buttons[2]:
-                if st.button("Próximo", use_container_width=True, key="step2_next"):
-                    st.session_state.wizard_step = 3
-                    st.rerun()
 
         elif step == 3:
             st.header("Passo 3 – Prova final")
@@ -182,28 +155,22 @@ def render_aba_avaliacoes():
                 st.write(f"{idx}. {codigo} - {descricao}")
             
             st.divider()
-            col_buttons = st.columns([1, 4, 1])
-            with col_buttons[0]:
-                if st.button("Voltar", use_container_width=True, key="step3_back"):
-                    st.session_state.wizard_step = 2
-                    st.rerun()
-            with col_buttons[2]:
-                if st.button("Salvar", use_container_width=True, key="step3_save"):
-                    novo = {
-                        "Título": f"Avaliação {len(st.session_state.avaliacoes_df)+1}",
-                        "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
-                        "Disciplina": "",
-                        "ODS": "",
-                    }
-                    st.session_state.avaliacoes_df = pd.concat([
-                        st.session_state.avaliacoes_df,
-                        pd.DataFrame([novo])
-                    ], ignore_index=True)
-                    st.session_state.wizard_step = 0
-                    st.session_state.wizard_selected = []
-                    st.session_state.wizard_order = []
-                    st.session_state.modo_avaliacoes = "lista"
-                    st.rerun()
+            if st.button("Salvar", use_container_width=True, key="step3_save"):
+                novo = {
+                    "Título": f"Avaliação {len(st.session_state.avaliacoes_df)+1}",
+                    "Data": pd.Timestamp.today().strftime("%Y-%m-%d"),
+                    "Disciplina": "",
+                    "ODS": "",
+                }
+                st.session_state.avaliacoes_df = pd.concat([
+                    st.session_state.avaliacoes_df,
+                    pd.DataFrame([novo])
+                ], ignore_index=True)
+                st.session_state.wizard_step = 0
+                st.session_state.wizard_selected = []
+                st.session_state.wizard_order = []
+                st.session_state.modo_avaliacoes = "lista"
+                st.rerun()
 
         return
 
