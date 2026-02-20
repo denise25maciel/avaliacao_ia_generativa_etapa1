@@ -142,18 +142,22 @@ def render_aba_bases_dados():
         
         if questoes:
             for idx, questao in enumerate(questoes, 1):
-                st.subheader(f"Questão {questao['numero']}")
-                st.write(questao["enunciado"])
+                st.subheader(f"Questão {questao.get('numero', idx)}")
+                st.write(questao.get("enunciado", ""))
                 
-                st.write("**Alternativas:**")
-                col_alt = st.columns(1)
-                
-                for letra, texto in questao["alternativas"].items():
-                    # Destaca a resposta correta
-                    if letra == questao["resposta_correta"]:
-                        st.success(f"**{letra})** {texto} ✓")
-                    else:
-                        st.write(f"{letra}) {texto}")
+                # Verifica se é questão de múltipla escolha ou resposta aberta
+                if "alternativas" in questao and "resposta_correta" in questao:
+                    # Questão de múltipla escolha
+                    st.write("**Alternativas:**")
+                    for letra, texto in questao["alternativas"].items():
+                        if letra == questao["resposta_correta"]:
+                            st.success(f"**{letra})** {texto} ✓")
+                        else:
+                            st.write(f"{letra}) {texto}")
+                else:
+                    # Questão com resposta aberta
+                    st.write("**Resposta:**")
+                    st.info(questao.get("resposta", ""))
                 
                 st.divider()
         else:
@@ -212,6 +216,19 @@ def render_aba_bases_dados():
                     [st.session_state.bases_df, pd.DataFrame([nova_base])],
                     ignore_index=True
                 )
+                
+                # Processa as questões do arquivo importado
+                questoes_importadas = []
+                for idx, row in df_importado.iterrows():
+                    questao = {
+                        "numero": idx + 1,
+                        "enunciado": row.get("Descrição", row.get("questao", "")),
+                        "resposta": row.get("Resposta", row.get("resposta", ""))
+                    }
+                    questoes_importadas.append(questao)
+                
+                # Armazena as questões importadas com o nome da base
+                st.session_state.questoes_bases[nome_base] = questoes_importadas
                 
                 # Marca o arquivo como processado
                 st.session_state.arquivos_importados.add(arquivo_id)

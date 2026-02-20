@@ -7,12 +7,19 @@ def render_aba_exercicios():
     """
     # garante que o DataFrame exista
     if "exercicios_df" not in st.session_state:
+        # Inicializa com alguns exercícios de exemplo
         st.session_state.exercicios_df = pd.DataFrame({
-            "Código": [],
-            "Descrição": [],
-            "Fonte": [],
-            "Ano": [],
-            "Dificuldade": [],
+            "Código": ["EX001", "EX002", "EX003", "EX004", "EX005"],
+            "Descrição": [
+                "Sobre estruturas de dados lineares, qual estrutura segue o princípio FILO?",
+                "Qual é a complexidade de tempo do algoritmo Quick Sort no melhor caso?",
+                "Qual protocolo da camada de transporte garante entrega confiável de dados?",
+                "Em Programação Orientada a Objetos, qual princípio garante que detalhes internos sejam ocultados?",
+                "Qual é a diferença entre compilador e interpretador?"
+            ],
+            "Fonte": ["ENADE", "ENADE", "ENADE", "ENADE", "Concurso"],
+            "Ano": [2021, 2021, 2021, 2023, 2024],
+            "Dificuldade": ["Médio", "Médio", "Médio", "Médio", "Fácil"],
         })
 
     df = st.session_state.exercicios_df

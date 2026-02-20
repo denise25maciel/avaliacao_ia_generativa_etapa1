@@ -21,22 +21,49 @@ st.title("Plataforma de Gestão de Exercícios")
 # ---------------------------------------------------
 
 def inicializar_dados():
-    codigos = [f"EX{i:03d}" for i in range(1, 31)]
-    descricoes = [f"Exercício número {i}" for i in range(1, 31)]
-    fontes = ["ENADE" if i % 2 == 1 else "CONCURSO" for i in range(1, 31)]
-    anos = [2020 + (i % 6) for i in range(1, 31)]
-    dificuldades = [
-        "Fácil" if i % 3 == 0 else ("Médio" if i % 3 == 1 else "Difícil")
-        for i in range(1, 31)
-    ]
-
-    return pd.DataFrame({
-        "Código": codigos,
-        "Descrição": descricoes,
-        "Fonte": fontes,
-        "Ano": anos,
-        "Dificuldade": dificuldades,
-    })
+    dados = {
+        "Código": [f"EX{i:03d}" for i in range(1, 31)],
+        "Descrição": [
+            "Sobre estruturas de dados lineares, qual estrutura segue o princípio FILO?",
+            "Qual é a complexidade de tempo do algoritmo Quick Sort no melhor caso?",
+            "Qual protocolo da camada de transporte garante entrega confiável?",
+            "Em POO, qual princípio garante que detalhes internos sejam ocultados?",
+            "Qual é a diferença entre compilador e interpretador?",
+            "Explique o conceito de normalização em bancos de dados",
+            "O que é injeção de dependência em programação?",
+            "Qual técnica criptográfica utiliza duas chaves diferentes?",
+            "Em SQL, qual comando recupera dados de tabelas?",
+            "Qual é a complexidade de espaço do algoritmo Merge Sort?",
+            "Descreva o padrão de projeto Singleton",
+            "Qual é a diferença entre REST e SOAP?",
+            "Explique o conceito de eventual consistency",
+            "O que é Docker e sua principal vantagem?",
+            "Qual modelo de processo tem iterações curtas?",
+            "Qual camada do OSI é responsável por roteamento?",
+            "O que é uma função hash criptográfica?",
+            "Descreva o padrão MVC na arquitetura de software",
+            "Qual é o teorema CAP em sistemas distribuídos?",
+            "O que é uma chave estrangeira em bancos de dados?",
+            "Explique o conceito de deadlock em SO",
+            "Qual é a diferença entre TCP e UDP?",
+            "O que é o padrão Observer em design patterns?",
+            "Descreva o pipeline de um processador",
+            "Qual é a função da Unidade Lógica e Aritmética?",
+            "O que é cache em sistemas computacionais?",
+            "Explique o conceito de multithreading",
+            "Qual é a diferença entre busca DFS e BFS?",
+            "O que é normalização de dados?",
+            "Descreva o ciclo de vida do software"
+        ],
+        "Fonte": ["ENADE" if i % 2 == 1 else "Concurso" for i in range(1, 31)],
+        "Ano": [2020 + (i % 6) for i in range(1, 31)],
+        "Dificuldade": [
+            "Fácil" if i % 3 == 0 else ("Médio" if i % 3 == 1 else "Difícil")
+            for i in range(1, 31)
+        ],
+    }
+    
+    return pd.DataFrame(dados)
 
 
 if "exercicios_df" not in st.session_state:
