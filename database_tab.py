@@ -18,6 +18,101 @@ def render_aba_bases_dados():
             "Tema": ["Educação", "Educação", "Trabalho Digno"],
         })
 
+    # Questões de exemplo para cada base de dados
+    if "questoes_bases" not in st.session_state:
+        st.session_state.questoes_bases = {
+            "ENADE Computação 2021": [
+                {
+                    "numero": 1,
+                    "enunciado": "Sobre estruturas de dados lineares, qual estrutura segue o princípio FILO?",
+                    "alternativas": {
+                        "A": "Fila (Queue)",
+                        "B": "Pilha (Stack)",
+                        "C": "Lista Ligada",
+                        "D": "Árvore Binária",
+                        "E": "Grafo"
+                    },
+                    "resposta_correta": "B"
+                },
+                {
+                    "numero": 2,
+                    "enunciado": "Qual é a complexidade de tempo do algoritmo Quick Sort no melhor caso?",
+                    "alternativas": {
+                        "A": "O(n²)",
+                        "B": "O(n log n)",
+                        "C": "O(n)",
+                        "D": "O(log n)",
+                        "E": "O(1)"
+                    },
+                    "resposta_correta": "B"
+                },
+                {
+                    "numero": 3,
+                    "enunciado": "Qual protocolo da camada de transporte garante entrega confiável de dados?",
+                    "alternativas": {
+                        "A": "UDP",
+                        "B": "ICMP",
+                        "C": "TCP",
+                        "D": "IGMP",
+                        "E": "DHCP"
+                    },
+                    "resposta_correta": "C"
+                }
+            ],
+            "ENADE Computação 2023": [
+                {
+                    "numero": 1,
+                    "enunciado": "Em Programação Orientada a Objetos, qual princípio garante que detalhes internos sejam ocultados?",
+                    "alternativas": {
+                        "A": "Herança",
+                        "B": "Polimorfismo",
+                        "C": "Encapsulamento",
+                        "D": "Abstração",
+                        "E": "Composição"
+                    },
+                    "resposta_correta": "C"
+                },
+                {
+                    "numero": 2,
+                    "enunciado": "Qual modelo de processo de software caracteriza-se por iterações curtas e entregas incrementais?",
+                    "alternativas": {
+                        "A": "Cascata (Waterfall)",
+                        "B": "V-Model",
+                        "C": "Metodologias Ágeis",
+                        "D": "Espiral",
+                        "E": "RUP"
+                    },
+                    "resposta_correta": "C"
+                }
+            ],
+            "Concursos TI 2024": [
+                {
+                    "numero": 1,
+                    "enunciado": "Qual técnica criptográfica utiliza duas chaves diferentes (pública e privada)?",
+                    "alternativas": {
+                        "A": "Criptografia Simétrica",
+                        "B": "XOR",
+                        "C": "Criptografia Assimétrica",
+                        "D": "Hash",
+                        "E": "Substituição"
+                    },
+                    "resposta_correta": "C"
+                },
+                {
+                    "numero": 2,
+                    "enunciado": "Em SQL, qual comando recupera dados de uma ou mais tabelas?",
+                    "alternativas": {
+                        "A": "INSERT",
+                        "B": "UPDATE",
+                        "C": "DELETE",
+                        "D": "SELECT",
+                        "E": "ALTER"
+                    },
+                    "resposta_correta": "D"
+                }
+            ]
+        }
+
     if "visualizando_base" not in st.session_state:
         st.session_state.visualizando_base = None
 
@@ -28,6 +123,44 @@ def render_aba_bases_dados():
         st.session_state.processando_upload = False
 
     df = st.session_state.bases_df
+
+    # Se está visualizando uma base, mostra as questões
+    if st.session_state.visualizando_base is not None:
+        nome_base = st.session_state.visualizando_base
+        
+        col1, col2 = st.columns([10, 1])
+        with col1:
+            st.header(f"Questões - {nome_base}")
+        with col2:
+            if st.button("← Voltar", key="voltar_bases"):
+                st.session_state.visualizando_base = None
+                st.rerun()
+        
+        st.divider()
+        
+        questoes = st.session_state.questoes_bases.get(nome_base, [])
+        
+        if questoes:
+            for idx, questao in enumerate(questoes, 1):
+                st.subheader(f"Questão {questao['numero']}")
+                st.write(questao["enunciado"])
+                
+                st.write("**Alternativas:**")
+                col_alt = st.columns(1)
+                
+                for letra, texto in questao["alternativas"].items():
+                    # Destaca a resposta correta
+                    if letra == questao["resposta_correta"]:
+                        st.success(f"**{letra})** {texto} ✓")
+                    else:
+                        st.write(f"{letra}) {texto}")
+                
+                st.divider()
+        else:
+            st.info("Nenhuma questão cadastrada para esta base.")
+        
+        st.divider()
+        return
 
     st.subheader("Bases de Dados Cadastradas")
 
