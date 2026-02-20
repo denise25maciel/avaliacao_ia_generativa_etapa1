@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from exercises_tab import render_aba_exercicios
 
 # ---------------------------------------------------
 # CONFIGURAÇÃO DA PÁGINA
@@ -161,52 +162,9 @@ aba_exercicios, aba_avaliacoes, aba_bases = st.tabs(
 )
 
 with aba_exercicios:
-
-    st.subheader("Lista de exercícios")
-
-    if st.button("Adicionar novo exercício"):
-        novo = {
-            "Código": "",
-            "Descrição": "",
-            "Fonte": "ENADE",
-            "Ano": 2024,
-            "Dificuldade": "Fácil"
-        }
-
-        st.session_state.exercicios_df = pd.concat(
-            [df, pd.DataFrame([novo])],
-            ignore_index=True
-        )
-
-        st.session_state.editando_idx = len(st.session_state.exercicios_df) - 1
-        st.session_state.modo = "editar"
-        st.rerun()
-
-    st.divider()
-
-    # Cabeçalho
-    header = st.columns([1, 3, 2, 1, 1, 1])
-    header[0].write("Código")
-    header[1].write("Descrição")
-    header[2].write("Fonte")
-    header[3].write("Ano")
-    header[4].write("Dificuldade")
-    header[5].write("")
-
-    for idx, row in df.iterrows():
-
-        linha = st.columns([1, 3, 2, 1, 1, 1])
-
-        linha[0].write(row["Código"])
-        linha[1].write(row["Descrição"])
-        linha[2].write(row["Fonte"])
-        linha[3].write(row["Ano"])
-        linha[4].write(row["Dificuldade"])
-
-        if linha[5].button("✏️", key=f"editar_{idx}"):
-            st.session_state.editando_idx = idx
-            st.session_state.modo = "editar"
-            st.rerun()
+    # Delega renderização da aba para o módulo exercises_tab
+    render_aba_exercicios()
+    st.rerun()
 
 
 with aba_avaliacoes:
