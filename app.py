@@ -66,6 +66,30 @@ def inicializar_dados():
     return pd.DataFrame(dados)
 
 
+def gerar_comando_ia(descricao_exercicio, tema_ods):
+    return (
+        f"Adapte o exercício a seguir para o contexto de '{tema_ods}', "
+        f"mantendo o nível de dificuldade e a habilidade principal. "
+        f"Exercício original: {descricao_exercicio}"
+    )
+
+
+def adaptar_exercicio_para_ods(descricao_exercicio, tema_ods):
+    return (
+        f"No contexto de {tema_ods}, {descricao_exercicio} "
+        f"Relacione a solução técnica com impactos sociais, ambientais e de cidadania."
+    )
+
+
+def gerar_proximo_codigo_exercicio(df_exercicios):
+    codigos_validos = []
+    for codigo in df_exercicios["Código"].astype(str).tolist():
+        if codigo.startswith("EX") and codigo[2:].isdigit():
+            codigos_validos.append(int(codigo[2:]))
+    proximo_numero = (max(codigos_validos) + 1) if codigos_validos else 1
+    return f"EX{proximo_numero:03d}"
+
+
 if "exercicios_df" not in st.session_state:
     st.session_state.exercicios_df = inicializar_dados()
 
@@ -177,30 +201,84 @@ if st.session_state.modo == "editar":
     # -------------------------
 
     with col_direita:
-        
+        ods_opcoes = [
+            "ODS 1 - Erradicação da Pobreza",
+            "ODS 3 - Saúde e Bem-Estar",
+            "ODS 4 - Educação de Qualidade",
+            "ODS 8 - Trabalho Decente e Crescimento Econômico",
+            "ODS 9 - Indústria, Inovação e Infraestrutura",
+            "ODS 10 - Redução das Desigualdades",
+            "ODS 11 - Cidades e Comunidades Sustentáveis",
+            "ODS 12 - Consumo e Produção Responsáveis",
+            "ODS 13 - Ação Contra a Mudança Global do Clima",
+            "ODS 16 - Paz, Justiça e Instituições Eficazes",
+        ]
+
+        tema_key = f"tema_ods_ex_{idx}"
+        comando_key = f"comando_ia_ex_{idx}"
+        comando_tema_key = f"comando_ia_tema_ex_{idx}"
+        resultado_key = f"resultado_adaptacao_ex_{idx}"
+
+        if tema_key not in st.session_state:
+            st.session_state[tema_key] = "ODS 4 - Educação de Qualidade"
+
         st.subheader("Comandos para a IA")
+        tema_ods = st.selectbox(
+            "Tema ODS",
+            options=ods_opcoes,
+            key=tema_key,
+            disabled=view_only,
+        )
+
+        if (
+            comando_key not in st.session_state
+            or st.session_state.get(comando_tema_key) != tema_ods
+        ):
+            st.session_state[comando_key] = gerar_comando_ia(descricao, tema_ods)
+            st.session_state[comando_tema_key] = tema_ods
+
         comandos_ia = st.text_area(
             "Insira os comandos para a IA",
-            value="",
-            height=150,
-            label_visibility="collapsed"
+            key=comando_key,
+            height=180,
+            label_visibility="collapsed",
+            disabled=view_only,
         )
 
-        if st.button("Processar", key="processar_ia", use_container_width=True):
-            # Aqui você pode adicionar a lógica para processar os comandos
-            st.info(f"Comandos recebidos: {comandos_ia}")
+        if st.button("Processar", key="processar_ia", use_container_width=True, disabled=view_only):
+            st.session_state[resultado_key] = adaptar_exercicio_para_ods(
+                descricao_exercicio=descricao,
+                tema_ods=tema_ods,
+            )
+            st.success("Exercício adaptado com sucesso.")
 
         st.subheader("Resultado da Adaptação")
-        comandos_ia = st.text_area(
-            "IExercício adaptado para o ENEM",
-            value="",
-            height=150,
-            label_visibility="collapsed"
+        st.text_area(
+            "Exercício adaptado",
+            value=st.session_state.get(resultado_key, ""),
+            height=220,
+            label_visibility="collapsed",
+            disabled=True,
         )
 
-        if st.button("Salvar", use_container_width=True):
-            # Aqui você pode adicionar a lógica para processar os comandos
-            st.info(f"Comando salvo: {comandos_ia}")
+        if st.button("Salvar adaptação", key="salvar_adaptacao_ia", use_container_width=True, disabled=view_only):
+            resultado_adaptado = st.session_state.get(resultado_key, "").strip()
+            if not resultado_adaptado:
+                st.warning("Processe a adaptação antes de salvar.")
+            else:
+                novo_codigo = gerar_proximo_codigo_exercicio(st.session_state.exercicios_df)
+                novo_exercicio = {
+                    "Código": novo_codigo,
+                    "Descrição": resultado_adaptado,
+                    "Fonte": fonte,
+                    "Ano": int(ano),
+                    "Dificuldade": dificuldade,
+                }
+                st.session_state.exercicios_df = pd.concat(
+                    [st.session_state.exercicios_df, pd.DataFrame([novo_exercicio])],
+                    ignore_index=True,
+                )
+                st.success(f"Exercício adaptado salvo como novo registro ({novo_codigo}).")
         
         
     # Impede renderização do restante da página

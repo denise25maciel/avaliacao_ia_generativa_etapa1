@@ -214,17 +214,16 @@ def render_aba_avaliacoes():
     st.divider()
 
     # Cabeçalho da tabela com ações extras (colunas estreitas)
-    header = st.columns([3, 2, 2, 1, 0.4, 0.4, 0.4])
+    header = st.columns([3, 2, 2, 1, 0.4, 0.4])
     header[0].write("Título")
     header[1].write("Data")
     header[2].write("Disciplina")
     header[3].write("ODS")
     header[4].write("Ver")
-    header[5].write("Editar")
-    header[6].write("Excluir")
+    header[5].write("Excluir")
 
     for idx, row in df.iterrows():
-        linha = st.columns([3, 2, 2, 1, 0.4, 0.4, 0.4])
+        linha = st.columns([3, 2, 2, 1, 0.4, 0.4])
         linha[0].write(row["Título"])
         linha[1].write(row["Data"])
         linha[2].write(row["Disciplina"])
@@ -237,13 +236,7 @@ def render_aba_avaliacoes():
             st.session_state.view_only = True
             st.rerun()
 
-        if linha[5].button("✏️", key=f"editar_av_{idx}"):
-            st.session_state.avaliacoes_editando_idx = idx
-            st.session_state.modo_avaliacoes = "editar"
-            st.session_state.view_only = False
-            st.rerun()
-
-        if linha[6].button("🗑️", key=f"deletar_av_{idx}"):
+        if linha[5].button("🗑️", key=f"deletar_av_{idx}"):
             st.session_state.avaliacoes_df = df.drop(idx).reset_index(drop=True)
             st.rerun()
 
