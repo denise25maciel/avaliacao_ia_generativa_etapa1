@@ -1,84 +1,195 @@
 import streamlit as st
+import pandas as pd
+
+# ---------------------------------------------------
+# CONFIGURAÇÃO DA PÁGINA
+# ---------------------------------------------------
+
+st.set_page_config(
+    page_title="Plataforma de Gestão de Exercícios",
+    layout="wide"
+)
 
 st.title("Plataforma de Gestão de Exercícios")
-import pandas as pd
-# cria abas principais
-aba_exercicios, aba_avaliacoes, aba_bases = st.tabs(["Exercícios", "Avaliações", "Bases de Dados"])
-# função de diálogo decorada
-@st.dialog("Editar exercício")
-def edit_dialog(idx):
-    df = st.session_state.exercicios_df
-    edited = {}
-    for col in df.columns:
-        edited[col] = st.text_input(col, value=str(df.at[idx, col]))
-    col1, col2 = st.columns(2)
-    if col1.button("Salvar"):
-        for col, val in edited.items():
-            st.session_state.exercicios_df.at[idx, col] = val
-        st.rerun()
-    if col2.button("Cancelar"):
-        st.rerun()
 
-    st.write("Dados atuais:")
-    st.dataframe(st.session_state.exercicios_df)
+
+# ---------------------------------------------------
+# INICIALIZAÇÃO DO ESTADO
+# ---------------------------------------------------
+
+def inicializar_dados():
+    codigos = [f"EX{i:03d}" for i in range(1, 31)]
+    descricoes = [f"Exercício número {i}" for i in range(1, 31)]
+    fontes = ["ENADE" if i % 2 == 1 else "CONCURSO" for i in range(1, 31)]
+    anos = [2020 + (i % 6) for i in range(1, 31)]
+    dificuldades = [
+        "Fácil" if i % 3 == 0 else ("Médio" if i % 3 == 1 else "Difícil")
+        for i in range(1, 31)
+    ]
+
+    return pd.DataFrame({
+        "Código": codigos,
+        "Descrição": descricoes,
+        "Fonte": fontes,
+        "Ano": anos,
+        "Dificuldade": dificuldades,
+    })
+
+
+if "exercicios_df" not in st.session_state:
+    st.session_state.exercicios_df = inicializar_dados()
+
+if "modo" not in st.session_state:
+    st.session_state.modo = "lista"   # lista | editar
+
+if "editando_idx" not in st.session_state:
+    st.session_state.editando_idx = None
+
+
+df = st.session_state.exercicios_df
+
+
+# ===================================================
+# MODO EDIÇÃO FULLSCREEN
+# ===================================================
+
+if st.session_state.modo == "editar":
+
+    idx = st.session_state.editando_idx
+
+    st.header("Editar exercício")
+    st.divider()
+
+    col_esquerda, col_direita = st.columns([2, 1])
+
+    # -------------------------
+    # COLUNA PRINCIPAL (FORM)
+    # -------------------------
+
+    with col_esquerda:
+
+        codigo = st.text_input(
+            "Código",
+            value=df.at[idx, "Código"]
+        )
+
+        descricao = st.text_area(
+            "Descrição",
+            value=df.at[idx, "Descrição"],
+            height=150
+        )
+
+        fonte = st.selectbox(
+            "Fonte",
+            options=["ENADE", "CONCURSO"],
+            index=["ENADE", "CONCURSO"].index(df.at[idx, "Fonte"])
+        )
+
+        ano = st.number_input(
+            "Ano",
+            value=int(df.at[idx, "Ano"]),
+            step=1
+        )
+
+        dificuldade = st.selectbox(
+            "Dificuldade",
+            options=["Fácil", "Médio", "Difícil"],
+            index=["Fácil", "Médio", "Difícil"].index(df.at[idx, "Dificuldade"])
+        )
+
+        st.divider()
+
+        b1, b2 = st.columns(2)
+
+        if b1.button("Salvar", use_container_width=True):
+            st.session_state.exercicios_df.at[idx, "Código"] = codigo
+            st.session_state.exercicios_df.at[idx, "Descrição"] = descricao
+            st.session_state.exercicios_df.at[idx, "Fonte"] = fonte
+            st.session_state.exercicios_df.at[idx, "Ano"] = ano
+            st.session_state.exercicios_df.at[idx, "Dificuldade"] = dificuldade
+
+            st.session_state.modo = "lista"
+            st.session_state.editando_idx = None
+            st.rerun()
+
+        if b2.button("Cancelar", use_container_width=True):
+            st.session_state.modo = "lista"
+            st.session_state.editando_idx = None
+            st.rerun()
+
+    # -------------------------
+    # COLUNA LATERAL (PREVIEW)
+    # -------------------------
+
+    with col_direita:
+        st.subheader("Preview")
+        st.dataframe(st.session_state.exercicios_df.loc[[idx]], use_container_width=True)
+
+    # Impede renderização do restante da página
+    st.stop()
+
+
+# ===================================================
+# MODO LISTAGEM PRINCIPAL
+# ===================================================
+
+aba_exercicios, aba_avaliacoes, aba_bases = st.tabs(
+    ["Exercícios", "Avaliações", "Bases de Dados"]
+)
 
 with aba_exercicios:
-    st.header("Exercícios")
-    # tabela de exercícios persistente em sessão
-    
-
-
-
-    if "exercicios_df" not in st.session_state:
-        # cria 30 exercícios de exemplo automaticamente
-        codigos = [f"EX{i:03d}" for i in range(1, 31)]
-        descricoes = [f"Exercício número {i}" for i in range(1, 31)]
-        fontes = ["ENADE" if i % 2 == 1 else "CONCURSO" for i in range(1, 31)]
-        anos = [2020 + (i % 6) for i in range(1, 31)]
-        dificuldades = ["Fácil" if i % 3 == 0 else ("Médio" if i % 3 == 1 else "Difícil") for i in range(1, 31)]
-        data = {
-            "Código": codigos,
-            "Descrição": descricoes,
-            "Fonte": fontes,
-            "Ano": anos,
-            "Dificuldade": dificuldades,
-        }
-        st.session_state.exercicios_df = pd.DataFrame(data)
-
-    df = st.session_state.exercicios_df
-
-    if st.button("Adicionar novo exercício"):
-        new = {k: "" for k in df.columns}
-        st.session_state.exercicios_df = pd.concat([df, pd.DataFrame([new])], ignore_index=True)
-        edit_dialog(len(st.session_state.exercicios_df) - 1)
 
     st.subheader("Lista de exercícios")
-    # cabeçalho customizado
-    header_cols = st.columns([1,3,2,1,1,1])
-    header_cols[0].write("Código")
-    header_cols[1].write("Descrição")
-    header_cols[2].write("Fonte")
-    header_cols[3].write("Ano")
-    header_cols[4].write("Dificuldade")
-    header_cols[5].write("")
 
-    # exibe cada linha com botão de edição ao lado
+    if st.button("Adicionar novo exercício"):
+        novo = {
+            "Código": "",
+            "Descrição": "",
+            "Fonte": "ENADE",
+            "Ano": 2024,
+            "Dificuldade": "Fácil"
+        }
+
+        st.session_state.exercicios_df = pd.concat(
+            [df, pd.DataFrame([novo])],
+            ignore_index=True
+        )
+
+        st.session_state.editando_idx = len(st.session_state.exercicios_df) - 1
+        st.session_state.modo = "editar"
+        st.rerun()
+
+    st.divider()
+
+    # Cabeçalho
+    header = st.columns([1, 3, 2, 1, 1, 1])
+    header[0].write("Código")
+    header[1].write("Descrição")
+    header[2].write("Fonte")
+    header[3].write("Ano")
+    header[4].write("Dificuldade")
+    header[5].write("")
+
     for idx, row in df.iterrows():
-        row_cols = st.columns([1,3,2,1,1,1])
-        row_cols[0].write(row["Código"])
-        row_cols[1].write(row["Descrição"])
-        row_cols[2].write(row["Fonte"])
-        row_cols[3].write(row["Ano"])
-        row_cols[4].write(row["Dificuldade"])
-        if row_cols[5].button("✏️", key=f"edit_{idx}"):
-            edit_dialog(idx)
 
+        linha = st.columns([1, 3, 2, 1, 1, 1])
 
+        linha[0].write(row["Código"])
+        linha[1].write(row["Descrição"])
+        linha[2].write(row["Fonte"])
+        linha[3].write(row["Ano"])
+        linha[4].write(row["Dificuldade"])
+
+        if linha[5].button("✏️", key=f"editar_{idx}"):
+            st.session_state.editando_idx = idx
+            st.session_state.modo = "editar"
+            st.rerun()
 
 
 with aba_avaliacoes:
     st.header("Avaliações")
-    st.write("Área para montagem e visualização de avaliações/provas.")
+    st.write("Área para montagem e visualização de avaliações.")
+
 
 with aba_bases:
     st.header("Bases de Dados")
