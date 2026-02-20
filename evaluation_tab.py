@@ -42,6 +42,19 @@ def render_aba_avaliacoes():
                 st.info("Não há exercícios cadastrados para seleção.")
                 selecionados = []
             else:
+                todos_codigos = exercises["Código"].tolist()
+                a1, a2, _ = st.columns([1, 1, 4])
+                if a1.button("Selecionar todos", key="wizard_select_all"):
+                    st.session_state.wizard_selected = todos_codigos.copy()
+                    for codigo in todos_codigos:
+                        st.session_state[f"wizard_sel_{codigo}"] = True
+                    st.rerun()
+                if a2.button("Limpar seleção", key="wizard_clear_all"):
+                    st.session_state.wizard_selected = []
+                    for codigo in todos_codigos:
+                        st.session_state[f"wizard_sel_{codigo}"] = False
+                    st.rerun()
+
                 cab = st.columns([0.6, 1.2, 3.5, 1.5, 0.8, 1.2])
                 cab[0].write("Selecionar")
                 cab[1].write("Código")
@@ -53,12 +66,12 @@ def render_aba_avaliacoes():
                 selecionados = []
                 for _, row in exercises.iterrows():
                     codigo = row["Código"]
+                    chave_checkbox = f"wizard_sel_{codigo}"
+                    if chave_checkbox not in st.session_state:
+                        st.session_state[chave_checkbox] = codigo in st.session_state.wizard_selected
+
                     cols = st.columns([0.6, 1.2, 3.5, 1.5, 0.8, 1.2])
-                    marcado = cols[0].checkbox(
-                        "",
-                        value=codigo in st.session_state.wizard_selected,
-                        key=f"wizard_sel_{codigo}",
-                    )
+                    marcado = cols[0].checkbox("", key=chave_checkbox)
                     cols[1].write(codigo)
                     cols[2].write(row["Descrição"])
                     cols[3].write(row["Fonte"])
