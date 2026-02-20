@@ -245,16 +245,15 @@ if st.session_state.modo == "editar":
 
         st.stop()
 
-    st.header("Editar exercício")
     st.divider()
 
-    col_esquerda, col_direita = st.columns([2, 1])
-
     # -------------------------
-    # COLUNA PRINCIPAL (FORM)
+    # FORM PRINCIPAL
     # -------------------------
 
-    with col_esquerda:
+    col_form, _ = st.columns([2, 1])
+
+    with col_form:
 
         codigo = st.text_input(
             "Código",
@@ -269,57 +268,80 @@ if st.session_state.modo == "editar":
             disabled=view_only,
         )
 
-        fonte = st.selectbox(
-            "Fonte",
-            options=["ENADE", "CONCURSO"],
-            index=["ENADE", "CONCURSO"].index(df.at[idx, "Fonte"]),
-            disabled=view_only,
-        )
+        col_ano, col_fonte, col_dificuldade = st.columns([1, 1.2, 1.3])
 
-        ano = st.number_input(
-            "Ano",
-            value=int(df.at[idx, "Ano"]),
-            step=1,
-            disabled=view_only,
-        )
+        with col_ano:
+            anos_opcoes = list(range(2018, 2031))
+            ano_atual = int(df.at[idx, "Ano"])
+            if ano_atual not in anos_opcoes:
+                anos_opcoes.append(ano_atual)
+                anos_opcoes = sorted(anos_opcoes)
 
-        dificuldade = st.selectbox(
-            "Dificuldade",
-            options=["Fácil", "Médio", "Difícil"],
-            index=["Fácil", "Médio", "Difícil"].index(df.at[idx, "Dificuldade"]),
-            disabled=view_only,
-        )
+            ano = st.selectbox(
+                "Ano",
+                options=anos_opcoes,
+                index=anos_opcoes.index(ano_atual),
+                disabled=view_only,
+            )
+
+        with col_fonte:
+            fonte = st.selectbox(
+                "Fonte",
+                options=["ENADE", "CONCURSO"],
+                index=["ENADE", "CONCURSO"].index(df.at[idx, "Fonte"]),
+                disabled=view_only,
+            )
+
+        with col_dificuldade:
+            dificuldade = st.selectbox(
+                "Dificuldade",
+                options=["Fácil", "Médio", "Difícil"],
+                index=["Fácil", "Médio", "Difícil"].index(df.at[idx, "Dificuldade"]),
+                disabled=view_only,
+            )
 
         st.divider()
+        
+        if view_only:
+            # Modo visualização: apenas botão Voltar
+            col_voltar, _ = st.columns([1, 5])
+            with col_voltar:
+                voltar = st.button("Voltar", key="voltar_visualizacao")
+            
+            if voltar:
+                st.session_state.modo = "lista"
+                st.session_state.editando_idx = None
+                st.session_state.view_only = False
+                st.session_state.modo_magica = False
+                st.rerun()
+        else:
+            # Modo edição: botões Salvar e Cancelar
+            col_salvar, col_cancelar, _ = st.columns([1, 1, 4])
+            with col_salvar:
+                salvar = st.button("Salvar", key="salvar_exercicio")
 
-        b1, b2 = st.columns(2)
+            with col_cancelar:
+                cancelar = st.button("Cancelar", key="cancelar_edicao")
 
-        if not view_only and b1.button("Salvar", key="salvar_exercicio", use_container_width=True):
-            st.session_state.exercicios_df.at[idx, "Código"] = codigo
-            st.session_state.exercicios_df.at[idx, "Descrição"] = descricao
-            st.session_state.exercicios_df.at[idx, "Fonte"] = fonte
-            st.session_state.exercicios_df.at[idx, "Ano"] = ano
-            st.session_state.exercicios_df.at[idx, "Dificuldade"] = dificuldade
+            if salvar:
+                st.session_state.exercicios_df.at[idx, "Código"] = codigo
+                st.session_state.exercicios_df.at[idx, "Descrição"] = descricao
+                st.session_state.exercicios_df.at[idx, "Fonte"] = fonte
+                st.session_state.exercicios_df.at[idx, "Ano"] = ano
+                st.session_state.exercicios_df.at[idx, "Dificuldade"] = dificuldade
 
-            st.session_state.modo = "lista"
-            st.session_state.editando_idx = None
-            st.session_state.view_only = False
-            st.session_state.modo_magica = False
-            st.rerun()
+                st.session_state.modo = "lista"
+                st.session_state.editando_idx = None
+                st.session_state.view_only = False
+                st.session_state.modo_magica = False
+                st.rerun()
 
-        if b2.button("Cancelar", key="cancelar_edicao", use_container_width=True):
-            st.session_state.modo = "lista"
-            st.session_state.editando_idx = None
-            st.session_state.view_only = False
-            st.session_state.modo_magica = False
-            st.rerun()
-
-    # -------------------------
-    # COLUNA LATERAL (PREVIEW)
-    # -------------------------
-
-    with col_direita:
-        render_painel_ia(idx, descricao, fonte, ano, dificuldade, view_only)
+            if cancelar:
+                st.session_state.modo = "lista"
+                st.session_state.editando_idx = None
+                st.session_state.view_only = False
+                st.session_state.modo_magica = False
+                st.rerun()
         
         
     # Impede renderização do restante da página
@@ -335,7 +357,6 @@ if st.session_state.modo_avaliacoes == "editar":
     df2 = st.session_state.avaliacoes_df
     view_only = st.session_state.get("view_only", False)
 
-    st.header("Editar avaliação")
     st.divider()
 
     col_esquerda, col_direita = st.columns([2, 1])
@@ -368,9 +389,9 @@ if st.session_state.modo_avaliacoes == "editar":
 
         st.divider()
 
-        b1, b2 = st.columns(2)
+        b1, b2, _ = st.columns([1, 1, 4])
 
-        if not view_only and b1.button("Salvar", key="salvar_avaliacao", use_container_width=True):
+        if not view_only and b1.button("Salvar", key="salvar_avaliacao"):
             st.session_state.avaliacoes_df.at[idx, "Título"] = titulo
             st.session_state.avaliacoes_df.at[idx, "Data"] = str(data)
             st.session_state.avaliacoes_df.at[idx, "Disciplina"] = disciplina
@@ -381,7 +402,7 @@ if st.session_state.modo_avaliacoes == "editar":
             st.session_state.view_only = False
             st.rerun()
 
-        if b2.button("Cancelar", key="cancelar_edicao_avaliacao", use_container_width=True):
+        if b2.button("Cancelar", key="cancelar_edicao_avaliacao"):
             st.session_state.modo_avaliacoes = "lista"
             st.session_state.avaliacoes_editando_idx = None
             st.session_state.view_only = False
