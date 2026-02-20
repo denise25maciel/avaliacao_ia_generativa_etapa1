@@ -28,11 +28,37 @@ def render_aba_avaliacoes():
     if "wizard_order" not in st.session_state:
         st.session_state.wizard_order = []
 
+    # botão de iniciar wizard
+    if st.button("Criar avaliação", use_container_width=False):
+        st.session_state.wizard_step = 1
+        st.session_state.wizard_selected = []
+        st.session_state.wizard_order = []
+        st.rerun()
+
+    st.divider()
+
     # se wizard ativo, renderiza o passo correspondente e retorna cedo
     if st.session_state.wizard_step != 0:
         step = st.session_state.wizard_step
         exercises = st.session_state.exercicios_df
         descricao_por_codigo = exercises.set_index("Código")["Descrição"].to_dict() if not exercises.empty else {}
+
+        # Botões de navegação entre os passos
+        col_steps = st.columns(3)
+        with col_steps[0]:
+            if st.button("Etapa 1: Seleção", use_container_width=True, type="primary" if step == 1 else "secondary", key="nav_step_1"):
+                st.session_state.wizard_step = 1
+                st.rerun()
+        with col_steps[1]:
+            if st.button("Etapa 2: Ordenação", use_container_width=True, type="primary" if step == 2 else "secondary", key="nav_step_2"):
+                st.session_state.wizard_step = 2
+                st.rerun()
+        with col_steps[2]:
+            if st.button("Etapa 3: Prova Final", use_container_width=True, type="primary" if step == 3 else "secondary", key="nav_step_3"):
+                st.session_state.wizard_step = 3
+                st.rerun()
+
+        st.divider()
 
         if step == 1:
             st.header("Passo 1 – Seleção de exercícios")
@@ -163,13 +189,6 @@ def render_aba_avaliacoes():
             if col4.button("Imprimir"):
                 st.info("Use Ctrl+P no navegador para imprimir a prova final exibida.")
         return
-
-    # botão de iniciar wizard
-    if st.button("Adicionar nova avaliação"):
-        st.session_state.wizard_step = 1
-        st.session_state.wizard_selected = []
-        st.session_state.wizard_order = []
-        st.rerun()
 
     st.divider()
 
